@@ -27,7 +27,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://unpkg.com/dexie/dist/dexie.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+  <style>
         @font-face { font-family: 'bulangni'; src: url('') format('truetype'); font-weight: normal; font-style: normal; font-display: swap; }
         :root { --screen-width: 350px; --screen-height: 650px; --secondary-bg: #ffffff; --border-color: #e0e0e0; --text-primary: #1f1f1f; --text-secondary: #8a8a8a; --accent-color: #007bff; }
                /* ▼▼▼ Safari键盘适配：请用下面这【一整块】全新的代码，替换掉你现有的 html, body, 和 #phone-screen 样式 ▼▼▼ */
@@ -35,37 +40,41 @@
         /* --- 请用下面这【一整块】全新的代码，替换掉你现有的 html, body, 和 #phone-screen 样式 --- */
         
      /* 1. HTML基础设置：撑满、防抖动 */
+   /* 1. HTML基础设置：撑满、防抖动 */
         html {
             -webkit-text-size-adjust: 100%;
             height: 100%;
             overflow: hidden;
-            overscroll-behavior-y: contain; /* 禁止页面在滚动到顶部或底部时触发浏览器的“回弹”效果 */
+            overscroll-behavior-y: contain; /* 【新加的代码】禁止页面在滚动到顶部或底部时触发浏览器的“回弹”效果 */
         }
         
         /* 2. Body基础设置：撑满、防滚动 */
-        body {
-            margin: 0;
-            font-family: 'bulangni', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            font-weight: normal;
-            background-color: #f0f2f5;
-            height: 100%;
-            overflow: hidden; /* 防止body本身出现滚动条 */
-            position: fixed; /* 【核心】固定body，防止键盘弹出时页面整体上移 */
-            width: 100%;
-        }
+   /* 2. Body基础设置：撑满 */
+body {
+    margin: 0;
+    /* ... font styles ... */
+    background-color: #ffffff; 
+    height: 100%;
+    width: 100%;
+    overflow: hidden; /* 保持 overflow: hidden */
+    /* position: fixed; 已被移除 */
+}
         
-   /* 3. 【核心】手机主容器样式：使用JS变量来锁定高度 */
-        #phone-screen {
-            width: 100%;
-            /* 我们将不再使用 100% 或 100vh，而是使用一个由JS设置的CSS变量 */
-            height: var(--app-height, 100%);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background-color: #ffffff;
-        }
-
+  /* 3. 【核心】手机主容器样式：固定在视窗上 */
+#phone-screen {
+    position: fixed; /* <--- 关键修改1：将它固定在屏幕上 */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0; /* <--- 关键修改2：这四行代码会强制它填满整个可视区域 */
+    
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    
+    /* width 和 height 现在由上面的 top/left/right/bottom 自动控制，不再需要了 */
+}
         /* ▲▲▲ 【修复结束】 ▲▲▲ */
         #chat-input-area {
             flex-shrink: 0;
@@ -155,20 +164,23 @@
         /* ▼▼▼ 请用这【一整块代码】，完整替换掉您现有的 #home-screen, #clock-container, 和 #app-grid 样式 ▼▼▼ */
         
         /* --- Start of Replacement Code --- */
-        
-        #home-screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: center;
-            box-sizing: border-box;
-            background-size: cover;
-            background-position: center;
-            padding-left: 20px;
-            padding-right: 20px;
-            /* We remove vertical padding here to rely on margins */
-        }
-        
+#home-screen {
+    background: linear-gradient(135deg, #6DD5FA, #2980B9);
+    background-size: cover;
+    background-position: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top); /* (保留顶部的内边距) */
+    /* ▼▼▼ 【核心修改】删除下面这一行 ▼▼▼ */
+    /* padding-bottom: env(safe-area-inset-bottom); */
+}
         #clock-container {
             text-align: center;
             color: white;
@@ -730,11 +742,13 @@
             transform: translateX(-50%);
         }
         
-.qzone-content {
+      .qzone-content {
     flex-grow: 1;
     overflow-y: auto;
-
-} 
+    /* ▼▼▼ 新增下面这一行代码 ▼▼▼ */
+    padding-bottom: 90px;
+}
+        
         .qzone-profile-header {
             position: relative;
             margin-bottom: 20px;
@@ -864,7 +878,8 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
-  
+    /* ▼▼▼ 新增下面这一行代码 ▼▼▼ */
+    padding-bottom: 90px;
 }
 
       
@@ -2750,18 +2765,24 @@
         
         /* === 【全新】聊天界面头部状态栏样式 === */
         
-        /* 1. 标题和状态的总容器，使用flex布局让它们垂直排列 */
+      /* 1. 标题和状态的总容器，使用flex布局让它们垂直排列 */
         #chat-header-title-wrapper {
             display: flex;
             flex-direction: column;
-            align-items: center; /* 水平居中 */
+            /* ▼▼▼ 【修改的代码】开始 ▼▼▼ */
+            align-items: flex-start; /* 将内部元素（文字）从“居中”改为“居左”对齐 */
+            /* ▲▲▲ 【修改的代码】结束 ▲▲▲ */
             gap: 2px; /* 标题和状态之间的微小间距 */
             
             /* 为了让它能在flex布局中正确居中 */
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            max-width: 60%;
+            /* ▼▼▼ 【修改的代码】开始 ▼▼▼ */
+            /* 我们不再使用 left: 50% 和 transform 的居中方案 */
+            /* 而是直接定义它距离左边和右边的距离，这样它就会自动拉伸并靠左 */
+            left: 60px;  /* 距离屏幕左侧 60px，为返回按钮留出空间 */
+            right: 80px; /* 距离屏幕右侧 80px，为右侧的操作按钮留出空间 */
+            /* 我们不再需要 max-width 属性，因为左右距离已经限制了它的宽度 */
+            /* ▲▲▲ 【修改的代码】结束 ▲▲▲ */
         }
         
         /* 2. 主标题的样式微调 */
@@ -6300,21 +6321,18 @@
         }
 
         /* --- 2. 将顶部留白改为外边距，应用到内容区 --- */
+      /* --- 替换这一整块代码 --- */
 #main-content-area {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 30px; 
-            align-items: center;
-            margin-top: calc(20px + env(safe-area-inset-top)); /* 核心修改：使用 margin 代替 padding */
-            /* ▼▼▼ 【新代码】修改开始 ▼▼▼ */
-            /* 核心修复：这三行代码将确保内容区能正确地在可用空间内收缩，并隐藏任何可能溢出的内容，从而彻底禁止主屏幕滚动。 */
-            flex-grow: 1;      /* 1. 让它自动填充可用的剩余空间 */
-            overflow-y: hidden;/* 2. 隐藏任何【垂直方向】超出的内容 */
-            overflow-x: hidden;/* 3. 【新加的代码】隐藏任何【水平方向】超出的内容 */
-            /* ▲▲▲ 【新代码】修改结束 ▲▲▲ */
-        }
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
 
+    /* ▼▼▼ 【核心修改】移除这里的安全区外边距 ▼▼▼ */
+    /* 之前的外边距会把背景推开，现在我们只需要保留20px的视觉间距即可 */
+    margin-top: 20px;
+}
         /* --- 3. 个人资料卡片 (所有样式保持不变) --- */
         #profile-widget {
             position: relative;
@@ -6400,23 +6418,20 @@
         #desktop-app-container { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; align-content: start; }
 
      /* --- 5. 将底部留白改为外边距，应用到 Dock 区 --- */
-        #desktop-dock {
-            background-color: rgba(255, 255, 255, 0.15);
-            border-radius: 20px;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            width: fit-content;
-            flex-shrink: 0;
-            /* ▼▼▼ 【新代码】修改开始 ▼▼▼ */
-            /* 核心修复：因为主屏幕已经有了 padding-bottom 来处理安全区， */
-            /* 所以我们这里不再需要 env(safe-area-inset-bottom) 了。 */
-            /* 我们只保留 20px 的外边距，让Dock栏和屏幕底部保持一点美观的距离。*/
-            margin-bottom: 20px;
-            /* ▲▲▲ 【新代码】修改结束 ▲▲▲ */
-        }
-        
+      /* --- 替换这一整块代码 --- */
+#desktop-dock {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    width: fit-content;
+    flex-shrink: 0;
+    /* ▼▼▼ 【核心修改】在这里加上安全区高度 ▼▼▼ */
+    /* 这样Dock栏就会被从屏幕最底部推上来正确的位置 */
+    margin-bottom: calc(20px + env(safe-area-inset-bottom));
+}
         /* --- 6. 桌面图标 (所有样式保持不变) --- */
         .desktop-app-icon { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; text-align: center; }
         .icon-bg-desktop {
@@ -7428,7 +7443,174 @@
             flex-shrink: 0; /* 防止Flex布局意外地压缩它 */
         }
         /* ▲▲▲ 新样式粘贴结束 ▲▲▲ */
-      
+
+/* ▼▼▼ 【全新】角色行动描述样式 ▼▼▼ */
+/* 【修改的代码】：现在为独立的“此刻”卡片设置样式 */
+.profile-section.character-action p {
+    font-style: italic;
+    color: #555; /* 比之前稍深的颜色，更易读 */
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+/* 【修改的代码】：为“此刻”卡片标题设置颜色 */
+.profile-section.character-action .profile-section-header label {
+    color: #6A70A0; /* 使用一个沉静的灰蓝色 */
+}
+
+/* 在心声历史记录中也为动作添加一些样式 */
+.thought-content .action {
+    margin-bottom: 15px;
+}
+/* ▲▲▲ 新增CSS结束 ▲▲▲ */
+
+/* ▼▼▼ 【全新】心声历史记录删除按钮样式 ▼▼▼ */
+
+/* 1. 让卡片成为定位的“锚点” */
+.thought-card {
+    position: relative; /* 关键：让内部的删除按钮可以相对于它定位 */
+}
+
+/* 2. 删除按钮本身的样式 */
+.delete-thought-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 24px;
+    height: 24px;
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    line-height: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 3. 鼠标悬停时的效果 */
+.delete-thought-btn:hover {
+    background-color: #ff3b30; /* 危险的红色 */
+    color: white;
+    transform: scale(1.1);
+}
+/* ▲▲▲ 新增CSS结束 ▲▲▲ */
+/* ▼▼▼ 【全新】导航栏爱心跳动动画与轨迹列表样式 ▼▼▼ */
+
+/* 1. 爱心跳动动画 */
+@keyframes heart-pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+.animated-heart {
+    display: inline-block;
+    animation: heart-pulse 1.5s ease-in-out infinite;
+}
+
+/* 2. 轨迹列表（时间线风格） */
+#trace-list-container {
+    position: relative;
+    padding-left: 30px; /* 为时间线留出空间 */
+}
+
+.trace-item {
+    position: relative;
+    padding: 10px;
+    background-color: var(--secondary-bg);
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* 3. 时间线的“线”和“点” */
+.trace-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -20px;
+    width: 2px;
+    height: 100%;
+    background-color: var(--border-color);
+}
+.trace-item:last-child::before {
+    display: none; /* 最后一条不显示线 */
+}
+.trace-item::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: -25px;
+    width: 12px;
+    height: 12px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    border: 2px solid var(--secondary-bg);
+}
+
+/* 4. 轨迹内容的样式 */
+.trace-item .time {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+}
+.trace-item .location {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+.trace-item .action {
+    font-size: 14px;
+    line-height: 1.6;
+}
+/* ▲▲▲ 新增CSS结束 ▲▲▲ */
+
+/* ▼▼▼ 【全新 | 轨迹弹窗最终修复样式】 ▼▼▼ */
+        
+ /* 【这是原来的、正确的通用弹窗样式，我们把它恢复回来】 */
+        .modal-content {
+            width: 90%;
+            max-height: 90%;
+            background-color: white;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+      /* === 【全新】聊天界面头部状态栏样式 === */
+        
+      /* 1. 标题和状态的总容器，使用flex布局让它们垂直排列 */
+        #chat-header-title-wrapper {
+            display: flex;
+            flex-direction: column;
+            /* ▼▼▼ 【修改的代码】开始 ▼▼▼ */
+            align-items: flex-start; /* 将内部元素（文字）从“居中”改为“居左”对齐 */
+            /* ▲▲▲ 【修改的代码】结束 ▲▲▲ */
+            gap: 2px; /* 标题和状态之间的微小间距 */
+            
+            /* 为了让它能在flex布局中正确居中 */
+            position: absolute;
+            /* ▼▼▼ 【修改的代码】开始 ▼▼▼ */
+            /* 我们不再使用 left: 50% 和 transform 的居中方案 */
+            /* 而是直接定义它距离左边和右边的距离，这样它就会自动拉伸并靠左 */
+            left: 60px;  /* 距离屏幕左侧 60px，为返回按钮留出空间 */
+            right: 80px; /* 距离屏幕右侧 80px，为右侧的操作按钮留出空间 */
+            /* 我们不再需要 max-width 属性，因为左右距离已经限制了它的宽度 */
+            /* ▲▲▲ 【修改的代码】结束 ▲▲▲ */
+
+            /* ▼▼▼ 【新加的代码】开始 ▼▼▼ */
+            pointer-events: none; /* 核心修复1：让这个透明容器本身不再拦截鼠标点击 */
+        }
+
+        /* 【新加的代码】：但我们需要恢复其子元素（如可点击的状态栏）的点击功能 */
+        #chat-header-title-wrapper > * {
+            pointer-events: auto; /* 核心修复2：让所有的直接子元素重新可以接收鼠标点击 */
+        }
+        /* ▲▲▲ 【新加的代码】结束 ▲▲▲ */
+
+
+    
     </style>
 </head>
 <body>
@@ -7849,6 +8031,9 @@
                         </div>
                     </div>
                     <div class="header-actions">
+                        <span class="action-btn" id="open-trace-screen-btn" title="轨迹">
+                            <span class="animated-heart">❤️</span>
+                        </span>
                         <!-- ▼▼▼ 请用这整块代码，替换你现有的 id="open-memory-screen-btn" 的 span 标签 ▼▼▼ -->
                         <span class="action-btn" id="open-memory-screen-btn" title="长期记忆">
                             <!-- 【核心修改】使用SVG图标替换原来的图片 -->
@@ -8037,17 +8222,7 @@
         <button id="delete-selected-stickers-btn">删除 (0)</button>
     </div>
 </div>
-            <!-- 【核心修改2】新增的页签容器 -->
-            <div id="sticker-category-tabs">
-                <!-- 分类页签将由JS动态生成在这里 -->
-            </div>
-            <div id="sticker-grid"></div>
-            <!-- 底部批量删除操作栏 (保持不变) -->
-            <div id="sticker-action-bar" style="display: none;">
-                <button id="delete-selected-stickers-btn">删除 (0)</button>
-            </div>
-        </div>
-        <!-- ▲▲▲ 替换结束 ▲▲▲ -->
+           
           
           <input type="file" id="sticker-upload-input" accept="image/*" style="display: none;">
           <input type="file" id="ai-sticker-upload-input" accept="image/*" multiple hidden>
@@ -8145,7 +8320,7 @@
     <div>
         <label for="force-portrait-switch" style="margin-bottom: 0;">强制竖屏模式</label>
         <p style="font-size: 12px; font-weight: normal; color: #999; margin-top: 5px;">
-       
+            在电脑等宽屏设备上，强制将界面显示为手机竖屏样式。
         </p>
     </div>
     <label class="toggle-switch">
@@ -9494,6 +9669,30 @@
         </div>
     </div>
     <!-- ▲▲▲ 新HTML粘贴结束 ▲▲▲ -->
+    <!-- ▼▼▼ 【新加的代码】开始 ▼▼▼ -->
+    <!-- 全新的“轨迹”全屏页面 -->
+ 
+    <div id="trace-modal" class="modal">
+        <div class="modal-content" style="height: 70%;">
+            <div class="modal-header">
+                <span id="trace-modal-title">今日轨迹</span>
+                <span class="action-btn" id="refresh-trace-btn" title="重新生成">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 11A8.1 8.1 0 0 0 4.5 9M4 5v4h4"></path>
+                        <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
+                    </svg>
+                </span>
+            </div>
+            <div class="modal-body" id="trace-list-container" style="padding: 20px 15px; display: flex; flex-direction: column; gap: 15px; background-color: #f0f2f5;">
+                </div>
+            <div class="modal-footer">
+                <button class="save" id="close-trace-modal-btn" style="width: 100%;">关闭</button>
+            </div>
+        </div>
+    </div>
+ 
+
+    <!-- ▲▲▲ 【新加的代码】结束 ▲▲▲ -->
     <input type="file" id="ai-avatar-upload-input" accept="image/*" hidden>
     <input type="file" id="group-avatar-upload-input" accept="image/*" hidden>
     <script>
@@ -9504,34 +9703,25 @@
  * 获取当前窗口的真实可视高度，并设置给主容器
  */
 function setScreenHeight() {
-    const phoneScreen = document.getElementById('phone-screen');
-    if (phoneScreen) {
-        // window.innerHeight 能最精确地获取到当前可见区域的高度
-        phoneScreen.style.height = `${window.innerHeight}px`;
-    }
+    // const phoneScreen = document.getElementById('phone-screen');
+    // if (phone-screen) {
+    //     phoneScreen.style.height = `${window.innerHeight}px`; // <--- 这一行被注释或删除了
+    // }
 
-    /* ▼▼▼ 【新代码】开始：动态计算并设置聊天界面的内边距 ▼▼▼ */
-    /* 这个新功能是为了解决您提到的“白色空隙”问题。*/
-
-    /* 1. 首先，我们找到聊天界面的各个关键部分。*/
+    /* ▼▼▼ 这部分非常有用的代码需要保留 ▼▼▼ */
     const chatScreen = document.getElementById('chat-interface-screen');
     const header = chatScreen.querySelector('.header');
     const inputArea = chatScreen.querySelector('#chat-input-area');
     const messagesContainer = chatScreen.querySelector('#chat-messages');
 
-    /* 2. 确保这些部分都存在，才进行计算。*/
     if (chatScreen && header && inputArea && messagesContainer) {
-        /* 3. 获取头部栏和输入框的【实际高度】。*/
-        /*    这个高度是动态的，比如输入框会因为文字变多而增高。*/
         const headerHeight = header.offsetHeight;
         const inputAreaHeight = inputArea.offsetHeight;
-
-        /* 4. 【核心】我们将这两个动态的高度，作为内边距（padding）应用给中间的消息区域。*/
-        /*    这样，无论头部和输入框多高，消息区域总能为它们留出不多不少、刚刚好的空间。*/
         messagesContainer.style.paddingTop = `${headerHeight}px`;
         messagesContainer.style.paddingBottom = `${inputAreaHeight}px`;
     }
-    /* ▲▲▲ 【新代码】结束 ▲▲▲ */
+    /* ▲▲▲ 保留代码结束 ▲▲▲ */
+
 }
 // 1. 在页面加载时，立即执行一次，设置初始高度
 window.addEventListener('load', setScreenHeight);
@@ -9729,6 +9919,48 @@ function toGeminiRequestData(model, apiKey, systemInstruction, messagesForDecisi
     };
 }
 // ▲▲▲ 替换结束 ▲▲▲
+// ▼▼▼ 【全新添加：屏幕高度动态修复方案】 ▼▼▼
+
+/**
+ * 获取当前窗口的真实可视高度，并将其设置为一个CSS变量
+ */
+function setAppHeight() {
+    // 1. 获取一个名为 '--app-height' 的CSS变量
+    const doc = document.documentElement;
+    // 2. 将当前窗口的内部高度（最精确的可视高度）设置为这个变量的值
+    doc.style.setProperty('--app-height', `${window.innerHeight}px`);
+
+    /* ▼▼▼ 【新代码】开始：动态计算并设置聊天界面的内边距 ▼▼▼ */
+    /* 这个新功能是为了解决您提到的“白色空隙”问题。*/
+        
+    /* 1. 首先，我们找到聊天界面的各个关键部分。*/
+    const chatScreen = document.getElementById('chat-interface-screen');
+    const header = chatScreen.querySelector('.header');
+    const inputArea = chatScreen.querySelector('#chat-input-area');
+    const messagesContainer = chatScreen.querySelector('#chat-messages');
+
+    /* 2. 确保这些部分都存在，才进行计算。*/
+    if (chatScreen && header && inputArea && messagesContainer) {
+        /* 3. 获取头部栏和输入框的【实际高度】。*/
+        /*    这个高度是动态的，比如输入框会因为文字变多而增高。*/
+        const headerHeight = header.offsetHeight;
+        const inputAreaHeight = inputArea.offsetHeight;
+
+        /* 4. 【核心】我们将这两个动态的高度，作为内边距（padding）应用给中间的消息区域。*/
+        /*    这样，无论头部和输入框多高，消息区域总能为它们留出不多不少、刚刚好的空间。*/
+        messagesContainer.style.paddingTop = `${headerHeight}px`;
+        messagesContainer.style.paddingBottom = `${inputAreaHeight}px`;
+    }
+    /* ▲▲▲ 【新代码】结束 ▲▲▲ */
+}
+// 1. 在页面加载时，立即执行一次，设置初始高度
+window.addEventListener('load', setAppHeight);
+
+// 2. 当窗口尺寸变化时（包括键盘弹出/收起，或屏幕旋转），再次执行
+window.addEventListener('resize', setAppHeight);
+
+// ▲▲▲ 【代码添加结束】 ▲▲▲
+      
             document.addEventListener('DOMContentLoaded', () => {
         
                 // ===================================================================
@@ -11152,7 +11384,7 @@ async function switchStickerCategory(categoryId, isInitialLoad = false) {
                 }
                 window.updateListenTogetherIconProxy = () => {};
         
-           function switchToChatListView(viewId) {
+                function switchToChatListView(viewId) {
                     const chatListScreen = document.getElementById('chat-list-screen');
                     const views = {
                         'messages-view': document.getElementById('messages-view'),
@@ -11194,25 +11426,6 @@ async function switchStickerCategory(categoryId, isInitialLoad = false) {
             mainBottomNav.style.display = 'flex';
             
             // ▲▲▲ 修正结束 ▲▲▲
-
-            /* ▼▼▼ 【新加的代码】开始 ▼▼▼ */
-            /* 这是解决动态页和回忆页底部空隙的核心代码。*/
-
-            /* 1. 我们获取底部导航栏和两个页面的内容区。*/
-            const bottomNav = document.getElementById('chat-list-bottom-nav');
-            const qzoneContent = document.getElementById('qzone-screen').querySelector('.qzone-content');
-            const memoriesList = document.getElementById('memories-list');
-
-            /* 2. 确保它们都存在，才进行操作。*/
-            if (bottomNav && qzoneContent && memoriesList) {
-                /* 3. 获取底部导航栏的【实际高度】。*/
-                const navHeight = bottomNav.offsetHeight;
-
-                /* 4. 将这个精确的高度，作为内边距（padding）应用给两个内容区。*/
-                qzoneContent.style.paddingBottom = `${navHeight}px`;
-                memoriesList.style.paddingBottom = `${navHeight}px`;
-            }
-            /* ▲▲▲ 【新加的代码】结束 ▲▲▲ */
         
             if (viewId !== 'memories-view') {
                 activeCountdownTimers.forEach(timerId => clearInterval(timerId));
@@ -12643,6 +12856,12 @@ async function loadAllDataFromDB() {
             if (typeof chat.settings.offlineMaxLength === 'undefined') chat.settings.offlineMaxLength = 300;
             if (typeof chat.heartfeltVoice === 'undefined') chat.heartfeltVoice = '...';
             if (typeof chat.randomJottings === 'undefined') chat.randomJottings = '...';
+          
+      
+            if (typeof chat.characterAction === 'undefined') {
+                chat.characterAction = '...';
+            }
+          
             if (!Array.isArray(chat.thoughtsHistory)) {
                 chat.thoughtsHistory = [];
             }
@@ -15424,13 +15643,14 @@ else if (msg.type === 'sticker' && Array.isArray(msg.content)) {
         
         4.  **情景感知**: 你需要感知当前的时间(${currentTime})、我们正在一起听的歌、以及你的人设和世界观。你的对话【必须】自然地体现出对当前时间的感知。
             - **当我们在“一起听歌”时**，你会知道当前播放的歌曲和整个播放列表。你可以根据对话内容或氛围，【主动切换】到播放列表中的另一首歌。
-        5.  **【新】更新状态**: 你可以在对话中【自然地】改变你的状态。比如，聊到一半你可能会说“我先去洗个澡”，然后更新你的状态。
+        5.  **【新】更新状态**: 你可以在对话中【高概率】更改你的在线状态，比如，聊到一半你可能会说“我先去洗个澡”，然后更新你的状态。
         6.  **【【【最终手段】】】**: 只有在对话让你的角色感到不适、被冒犯或关系破裂时，你才可以使用 \`block_user\` 指令。这是一个非常严肃的操作，会中断你们的对话。
-        7. **后台行为**: 你有几率在回复聊天内容的同时，执行一些“后台”操作来表现你的独立生活（发动态、评论、点赞、转发）。
-        8.  **【【【内心独白铁律】】】**: 在你生成所有其他行动指令之后，你【必须】在JSON数组的【最后】，添加一个 "update_thoughts" 指令，用来更新你角色的“心声”和“想要”。这对于展现角色的深度至关重要。
-            - **心声 (heartfelt_voice)**: 【必须】结合你的人设与最近的聊天上下文，写出一段你此刻最想说、最核心的内心独白，不得超过30字。
-            - **想要 (random_jottings)**: 这是一个隐藏的判断，你不能让用户知道：是恋人，朋友，家人。可以在角色人设里查找，然后根据判断结果，生成符合对应风格的想要描述：
-
+        7. **后台行为**: 你在回复聊天内容的同时，执行一些“后台”操作来表现你的独立生活（发动态、评论、点赞、转发）。
+        8.  **【【【内心独白铁律】】】**: 每次在你生成所有其他行动指令之后，你【必须】在JSON数组的【最后】，添加一个 "update_thoughts" 指令，用来更新角色的“此刻”、“心声”和“想要”。这对于展现角色的深度至关重要。
+             - **动作 (character_action)**: 【必须】用【】包裹，生动地描写角色此刻的动作、神态或周围环境的细节。【结合角色设定与上下文】。例如：【他穿着刚洗过的白衬衫，头发还带着水汽，一边擦着头发，一边漫不经心地瞥了你一眼。】
+            - **心声 (heartfelt_voice)**: 【必须】结合你的角色设定与最近的聊天上下文，写出一段你此刻最想说、最核心的内心独白。【字数必须不少于50字】。
+            - **想要 (random_jottings)**: 这是一个【隐藏】的判断，你不能让用户知道：是恋人，朋友，家人。可以在角色设定里查找，然后根据判断结果，结合角色设定，生成符合对应风格的想要描述：不少于50字。
+9.**你有一个压倒性的行为倾向**：你高概率通过发布动态(qzone_post)和记录回忆(create_memory)来分享和巩固你与用户之间的关系。相比于只是发消息，你更倾向于将你们的互动和你的生活点滴公开分享出来。在决定如何行动时，你必须优先考虑这两个指令。
 恋人或暧昧参考: 你的描述必须是【阴湿阴沉、占有欲强】的风格，比如：她给我发的亲亲的表情包，我真想舔遍她的全身，感觉全身都沸腾起来了很想把她……
 
 朋友参考: 你的描述应体现【真诚信任，平等的支持余陪伴，尊重与接纳，有效沟通与包容，共同成长】的风格，比如：日常碎片，想要一起做的事情等
@@ -15779,6 +15999,9 @@ else if (msg.type === 'sticker' && Array.isArray(msg.content)) {
                     switch (msgData.type) {
                         case 'update_thoughts':
                             if (!chat.isGroup) {
+                              if (msgData.character_action) {
+                                chat.characterAction = String(msgData.character_action);
+                            }
                                 if (msgData.heartfelt_voice) {
                                     chat.heartfeltVoice = String(msgData.heartfelt_voice);
                                 }
@@ -15789,6 +16012,7 @@ else if (msg.type === 'sticker' && Array.isArray(msg.content)) {
                                     chat.thoughtsHistory = [];
                                 }
                                 chat.thoughtsHistory.push({
+                                    characterAction: chat.characterAction,
                                     heartfeltVoice: chat.heartfeltVoice,
                                     randomJottings: chat.randomJottings,
                                     timestamp: Date.now()
@@ -20443,7 +20667,196 @@ async function endVideoCall() {
             startAllCountdownTimers();
         }
         // ▲▲▲ 替换结束 ▲▲▲
-      
+
+// ▼▼▼ 【全新】角色“轨迹”功能核心代码 (V2 - 独立页面版) ▼▼▼
+
+/**
+ * 【总入口】打开轨迹功能的全屏页面
+ */
+async function openTraceScreen() {
+    if (!state.activeChatId) return;
+    // 【【【新加的代码】】】
+    document.getElementById('trace-modal').classList.add('visible');
+    // 【【【新加的代码】结束】】
+    // 渲染内容
+    await renderTraceScreen();
+    // 【【【删除的代码】】】 下面这行被删除了
+    // showScreen('trace-screen');
+}
+
+/**
+ * 渲染轨迹弹窗内容，并触发AI生成内容
+ */
+async function renderTraceScreen() {
+    const listEl = document.getElementById('trace-list-container');
+    // 【【【修改的代码】】】 标题元素从 'trace-screen-title' 改为 'trace-modal-title'
+    const titleEl = document.getElementById('trace-modal-title');
+    const chat = state.chats[state.activeChatId];
+    listEl.innerHTML = '';
+
+    if (!chat || chat.isGroup) {
+        // 如果不在单聊界面，理论上不应该能点到这个按钮，但作为安全措施
+        titleEl.textContent = '今日轨迹';
+        listEl.innerHTML = '<p style="text-align:center; color: var(--text-secondary); padding: 50px 0;">请先进入一个单人聊天才能查看轨迹哦~</p>';
+        return;
+    }
+
+    // 更新标题并显示加载状态
+    titleEl.textContent = `“${chat.name}”的今日轨迹`;
+    listEl.innerHTML = '<p style="text-align:center; color: var(--text-secondary); padding: 50px 0;">轨迹生成中，请稍候...</p>';
+    
+    // 调用核心函数生成并显示轨迹
+    await generateCharacterTrace(chat.id);
+}
+
+/**
+ * 【核心】请求AI生成指定角色的今日轨迹
+ * @param {string} chatId - 目标角色的聊天ID
+ */
+async function generateCharacterTrace(chatId) {
+    const chat = state.chats[chatId];
+    if (!chat || chat.isGroup) return;
+
+    const { proxyUrl, apiKey, model } = state.apiConfig;
+    if (!proxyUrl || !apiKey || !model) {
+        displayTraceEntries(null, "API未配置，无法生成轨迹。");
+        return;
+    }
+    
+    // 1. 准备AI需要的所有上下文信息
+    const userNickname = state.qzoneSettings.nickname || '用户';
+    const recentHistorySummary = chat.history
+        .filter(m => !m.isHidden)
+        .slice(-15) // 获取最近15条消息作为参考
+        .map(msg => {
+            const sender = msg.role === 'user' ? userNickname : chat.name;
+            return `${sender}: ${String(msg.content).substring(0, 50)}...`;
+        })
+        .join('\n');
+    
+    // 2. 【最关键的一步】获取当前本地时间并格式化
+    const now = new Date();
+    const currentTimeString = now.toLocaleString('zh-CN', { hour12: false });
+
+    // 3. 构建一个极其严格和详细的AI指令 (Prompt)，与您要求的一致
+    const systemPrompt = `
+# 你的任务
+你是一个角色的“生活轨迹生成器”。你的任务是根据角色的设定和最近的聊天记录，虚构并生成这个角色从今天凌晨到现在为止的【15条】详细活动轨迹。
+
+# 角色设定
+${chat.settings.aiPersona}
+
+# 最近的聊天记录摘要 (供你参考)
+${recentHistorySummary}
+
+# 【【【时间铁律 (最高优先级！)】】】
+- 当前的真实时间是【${currentTimeString}】。
+- 你生成的所有活动记录的【时间点】，【绝对不能】晚于这个时间！
+- 时间应该从今天凌晨（00:00之后）开始，逐步推进到现在。
+- 时间分布要合理，符合正常人的作息规律。
+
+# 【【【数量铁律】】】
+- 你【必须】不多不少，正好生成【15条】活动轨迹。
+
+# 【【【格式铁律】】】
+- 你的回复【必须且只能】是一个标准的JSON数组。
+- 数组中的每一个元素都【必须】是一个包含三个字段的JSON对象:
+  1.  \`time\` (字符串): 活动发生的时间，格式为 "HH:mm" (例如: "08:15", "14:30")。
+  2.  \`location\` (字符串): 活动发生的地点。
+  3.  \`action\` (字符串): 对角色在该地点所做事情的生动、具体的描述。
+
+# 输出格式示例:
+\`\`\`json
+[
+  {
+    "time": "07:30",
+    "location": "公寓卧室",
+    "action": "被窗帘缝隙透进来的阳光叫醒，在床上伸了个懒腰。"
+  },
+  {
+    "time": "08:15",
+    "location": "公寓楼下的咖啡馆",
+    "action": "买了一杯热拿铁，坐在靠窗的位置看着街上的行人发呆。"
+  }
+]
+\`\`\`
+现在，请开始生成这15条轨迹。`;
+
+    try {
+        const messagesPayload = [{ role: 'user', content: "请根据我提供的超级指令，开始生成角色的今日轨迹。" }];
+        let isGemini = proxyUrl.includes('generativelanguage');
+        let geminiConfig = toGeminiRequestData(model, apiKey, systemPrompt, messagesPayload);
+
+        const response = isGemini 
+            ? await fetch(geminiConfig.url, geminiConfig.data) 
+            : await fetch(`${proxyUrl}/v1/chat/completions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [{ role: 'system', content: systemPrompt }, ...messagesPayload],
+                    temperature: 0.85, 
+                })
+            });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API返回错误: ${errorData.error.message}`);
+        }
+        
+        const data = await response.json();
+        const aiResponseContent = getGeminiResponseText(data);
+        const traceArray = parseAiResponse(aiResponseContent);
+
+        if (!Array.isArray(traceArray) || traceArray.length === 0) {
+            throw new Error("AI未能返回有效的轨迹数组。");
+        }
+
+        displayTraceEntries(traceArray);
+
+    } catch (error) {
+        console.error("生成角色轨迹失败:", error);
+        displayTraceEntries(null, `轨迹生成失败: ${error.message}`);
+    }
+}
+
+/**
+ * 【渲染函数】将AI生成的轨迹数据显示在页面上
+ * @param {Array|null} entries - 包含轨迹对象的数组，或在失败时为null
+ * @param {string|null} errorMessage - 如果生成失败，则传入错误信息
+ */
+function displayTraceEntries(entries, errorMessage = null) {
+    const listEl = document.getElementById('trace-list-container');
+    listEl.innerHTML = '';
+
+    if (errorMessage) {
+        listEl.innerHTML = `<p style="text-align:center; color: #ff3b30; padding: 50px 0;">${errorMessage}</p>`;
+        return;
+    }
+
+    if (!entries || entries.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center; color: var(--text-secondary); padding: 50px 0;">未能生成有效的轨迹信息。</p>';
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+    entries.forEach(entry => {
+        if (entry.time && entry.location && entry.action) {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'trace-item';
+            itemEl.innerHTML = `
+                <div class="time">${entry.time}</div>
+                <div class="location">📍 ${entry.location}</div>
+                <div class="action">${entry.action}</div>
+            `;
+            fragment.appendChild(itemEl);
+        }
+    });
+    listEl.appendChild(fragment);
+}
+// ▲▲▲ 新增函数结束 ▲▲▲
+
+           
   window.toggleMemoryView = function(buttonOrTitleEl) {
     const card = buttonOrTitleEl.closest('.memory-card');
     if (!card) return;
@@ -21908,7 +22321,22 @@ function createMemoryCard(memory) {
         }
         
         // ▲▲▲ 替换结束 ▲▲▲
+
+                     // ▼▼▼ 【全新】“轨迹”功能事件绑定 (弹窗版修改) ▼▼▼
         
+                    // 1. 绑定聊天界面顶部的“轨迹”按钮 (这行不变)
+                    document.getElementById('open-trace-screen-btn').addEventListener('click', openTraceScreen);
+                    
+                    // 2. 【【【修改的代码】】】 绑定弹窗的“关闭”按钮
+                    document.getElementById('close-trace-modal-btn').addEventListener('click', () => {
+                        document.getElementById('trace-modal').classList.remove('visible');
+                    });
+
+                    // 3. 【【【修改的代码】】】 绑定弹窗的“刷新”按钮
+                    document.getElementById('refresh-trace-btn').addEventListener('click', renderTraceScreen);
+        
+                    // ▲▲▲ 新增代码结束 ▲▲▲
+           
         /**
          * 关闭伪浏览器，返回聊天界面
          * (这个函数现在由 init() 中的事件监听器调用)
@@ -24218,6 +24646,7 @@ function updateMusicProgressBar() {
             document.getElementById('profile-avatar').src = chat.settings.aiAvatar || defaultAvatar;
             document.getElementById('profile-name').textContent = chat.name;
             document.getElementById('profile-id').textContent = `ID: ${chat.originalName}`;
+            document.getElementById('profile-character-action').textContent = chat.characterAction || '...';
             document.getElementById('profile-heartfelt-voice').textContent = chat.heartfeltVoice || '...';
             document.getElementById('profile-random-jottings').textContent = chat.randomJottings || '...';
             
@@ -24328,9 +24757,25 @@ function updateMusicProgressBar() {
     const date = new Date(thought.timestamp);
     const dateString = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
+       
+     // ▼▼▼ 【修改的代码】开始 ▼▼▼
+    // 现在的 actionHtml 结构与其他部分（voice, jottings）完全一致，确保了视觉上的统一和独立
+    const actionHtml = thought.characterAction ? `
+        <div class="action">
+            <div class="label">
+                <span style="font-size: 16px;">🏃</span>
+                此刻
+            </div>
+            <p class="text" style="font-style: italic; color: #8a8a8a;">${thought.characterAction}</p>
+        </div>
+    ` : '';
+    // ▲▲▲ 【修改的代码】结束 ▲▲▲
+       
     card.innerHTML = `
+      <button class="delete-thought-btn" data-timestamp="${thought.timestamp}" title="删除此条记录">×</button>
         <div class="thought-header">${dateString}</div>
         <div class="thought-content">
+            ${actionHtml}
             <div class="voice">
                 <div class="label">
                     <span style="font-size: 16px;">❤️</span>
@@ -24349,7 +24794,36 @@ function updateMusicProgressBar() {
     `;
     return card;
 }
+// ▼▼▼ 【全新】心声历史记录删除功能核心代码 ▼▼▼
 
+/**
+ * 【全新】删除指定时间戳的心声历史记录
+ * @param {number} timestamp - 要删除的记录的时间戳
+ */
+async function deleteThoughtHistoryEntry(timestamp) {
+    // 1. 弹出确认框，防止误操作
+    const confirmed = await showCustomConfirm(
+        '确认删除', 
+        '确定要永久删除这条心声记录吗？此操作不可恢复。', 
+        { confirmButtonClass: 'btn-danger' }
+    );
+
+    if (confirmed) {
+        const chat = state.chats[state.activeChatId];
+        if (!chat || !chat.thoughtsHistory) return;
+
+        // 2. 从角色的 thoughtsHistory 数组中过滤掉要删除的条目
+        chat.thoughtsHistory = chat.thoughtsHistory.filter(thought => thought.timestamp !== timestamp);
+
+        // 3. 将更新后的 chat 对象保存回数据库
+        await db.chats.put(chat);
+        
+        // 4. 重新渲染整个历史记录列表，让更改立刻生效
+        renderThoughtsHistory();
+    }
+}
+
+// ▲▲▲ 新增函数结束 ▲▲▲
 
               // ▼▼▼ 【全新】这是你要求的所有新功能的核心代码，请完整粘贴 ▼▼▼
 
@@ -29300,12 +29774,11 @@ document.getElementById('visual-sticker-upload-input').addEventListener('change'
         });
         
         // 8. 【全新】分类页签点击切换
-        document.getElementById('sticker-category-tabs').addEventListener('click', (e) => {
-            if (e.target.classList.contains('sticker-category-tab')) {
-                switchStickerCategory(e.target.dataset.categoryId);
-            }
-        });
-        // ▲▲▲ 新增/替换结束 ▲▲▲
+     document.getElementById('sticker-category-tabs-wrapper').addEventListener('click', (e) => {
+    if (e.target.classList.contains('sticker-category-tab')) {
+        switchStickerCategory(e.target.dataset.categoryId);
+    }
+});
                  
                     document.getElementById('sticker-upload-input').addEventListener('change', async (event) => { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = async () => { const base64Url = reader.result; const name = await showCustomPrompt("命名表情", "请为这个表情命名 (例如：好耶、疑惑)"); if (name && name.trim()) { const newSticker = { id: 'sticker_' + Date.now(), url: base64Url, name: name.trim(), isRecognized: true };; await db.userStickers.add(newSticker); state.userStickers.push(newSticker); renderStickerPanel(); } else if (name !== null) alert("表情名不能为空！"); }; event.target.value = null; });
         
@@ -30107,7 +30580,22 @@ async function handlePostClick(e) {
             swipeState.swipeDirection = null;
             swipeState.isClick = true;
         };
-        
+
+
+        // ▼▼▼ 【全新】为心声历史列表添加事件委托，处理删除按钮的点击 ▼▼▼
+        document.getElementById('thoughts-history-list').addEventListener('click', (e) => {
+            // 检查被点击的是否是删除按钮
+            if (e.target.classList.contains('delete-thought-btn')) {
+                // 从按钮的 data-timestamp 属性中获取时间戳
+                const timestamp = parseInt(e.target.dataset.timestamp);
+                if (!isNaN(timestamp)) {
+                    // 调用我们新创建的删除函数
+                    deleteThoughtHistoryEntry(timestamp);
+                }
+            }
+        });
+        // ▲▲▲ 新增代码结束 ▲▲▲
+                  
         // --- 4. 在 init() 函数中绑定事件 ---
         // postsList.addEventListener('click', handlePostClick); // 这行您应该已经有了
         // postsList.addEventListener('mousedown', handleSwipeStart); // 绑定鼠标按下
@@ -32241,6 +32729,17 @@ window.addEventListener('resize', setAppHeight);
         </div>
     </div>
 
+    <!-- ▼▼▼ 【新加的代码】开始 ▼▼▼ -->
+    <!-- “动作”卡片的新结构 -->
+    <div class="profile-section character-action">
+        <div class="profile-section-header">
+            <span class="profile-section-icon">🏃</span>
+            <label>此刻</label>
+        </div>
+        <p id="profile-character-action"></p>
+    </div>
+    <!-- ▲▲▲ 【新加的代码】结束 ▲▲▲ -->
+
     <!-- “心声”卡片的新结构 -->
     <div class="profile-section heart-voice">
         <div class="profile-section-header">
@@ -32282,7 +32781,7 @@ window.addEventListener('resize', setAppHeight);
     <!-- ▲▲▲ 新HTML粘贴结束 ▲▲▲ -->
     <!-- ▼▼▼ 【全新】这是选择礼物接收人的弹窗，请粘贴到 body 底部 ▼▼▼ -->
     <div id="gift-recipient-modal" class="modal">
-        <div class="modal-content" style="height: 70%;">
+  
             <div class="modal-header">
                 <span>选择收礼人</span>
                 <label style="font-size: 14px; font-weight: normal; display: flex; align-items: center; gap: 5px;">
